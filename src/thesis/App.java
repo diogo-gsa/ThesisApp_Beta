@@ -33,48 +33,25 @@ public class App {
 
     public static void main(String[] args) throws Exception {
 
-        //fetchHTML("http://web.ist.utl.pt/ist162490");
-        fetchHTML_SSL("https://172.20.70.229/reading");
-
-        /*
-         * String url = "http://web.ist.utl.pt/ist162490";
-         * 
-         * HttpClient client = HttpClientBuilder.create().build(); HttpGet request = new
-         * HttpGet(url);
-         * 
-         * // add request header request.addHeader("User-Agent", "MySuperUserAgent");
-         * HttpResponse response;
-         * 
-         * try { response = client.execute(request); System.out.println("Response Code : "
-         * + response.getStatusLine().getStatusCode());
-         * 
-         * BufferedReader rd = new BufferedReader( new
-         * InputStreamReader(response.getEntity().getContent()));
-         * 
-         * StringBuffer result = new StringBuffer(); String line = ""; while ((line =
-         * rd.readLine()) != null) { result.append(line); } } catch (IOException e) {
-         * System.out.println("--A--"); e.printStackTrace(); } System.out.println("...");
-         */
+        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
+        Thread.sleep(2000);
+        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
+        Thread.sleep(2000);
+        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
+        Thread.sleep(2000);
+        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
+        Thread.sleep(2000);
+        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
+        Thread.sleep(2000);
+        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
+                
     }
 
-    public static void fetchHTML(String site) {
-        try {
-            URL siteURL = new URL(site);
-            URLConnection connectionURL = siteURL.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connectionURL.getInputStream()));
-            String inputLine;
-
-            while ((inputLine = in.readLine()) != null)
-                System.out.println(inputLine);
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     
-    public static void fetchHTML_SSL(String site) {
+    public static void fetchSensorReading_HTTPS(String url, String username, String password) {
         
-        // Create a trust manager that does not validate certificate chains
+        // Sensor server uses HTTPS and use a self-signed certificate, then we must
+        // create a trust manager that does not validate certificate chains
         TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
             public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
             public void checkClientTrusted(X509Certificate[] certs, String authType) {}
@@ -82,15 +59,13 @@ public class App {
         } };
         
         // Install the all-trusting trust manager
-        SSLContext sc;
         try{
-            sc = SSLContext.getInstance("SSL");
+            SSLContext sc = SSLContext.getInstance("SSL");
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         }catch (NoSuchAlgorithmException e) {e.printStackTrace();}
-         catch (KeyManagementException e1) {e1.printStackTrace();}
+         catch (KeyManagementException e) {e.printStackTrace();}
      
-        
         // Create all-trusting host name verifier
         HostnameVerifier allHostsValid = new HostnameVerifier() {
             public boolean verify(String hostname, SSLSession session) {
@@ -100,21 +75,22 @@ public class App {
 
         // Install the all-trusting host verifier
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        
+     
+        // now we are prepared to make HTTPS requests to a server with 
+        // self signed certificates
         try {
-            URL siteURL = new URL(site);
+            URL siteURL = new URL(url);
             URLConnection connectionURL = siteURL.openConnection();
-            
+           
+            //Setting the doInput flag to indicate that the application intends to read data from the URL connection.
             connectionURL.setDoInput (true);
-            //connectionURL.setRequestProperty ("Authorization", userNamePasswordBase64("root","root"));
-            String userNamePasswordBase64 = "Basic " + base64Encode("root" + ":" + "root");
+            String userNamePasswordBase64 = "Basic " + base64Encode(username + ":" + password);
             connectionURL.setRequestProperty ("Authorization", userNamePasswordBase64);
-            
-            //connectionURL.connect();
+            //connectionURL.connect(); //connection is already open
             
             BufferedReader in = new BufferedReader(new InputStreamReader(connectionURL.getInputStream()));
+            
             String inputLine;
-
             while ((inputLine = in.readLine()) != null)
                 System.out.println(inputLine);
             in.close();
