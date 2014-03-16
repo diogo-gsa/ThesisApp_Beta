@@ -1,15 +1,11 @@
 package thesis;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.io.*;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -17,39 +13,23 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
-
 public class App {
 
     //private static String url = "http://www.apache.org/";
 
     public static void main(String[] args) throws Exception {
 
-        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
-        Thread.sleep(2000);
-        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
-        Thread.sleep(2000);
-        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
-        Thread.sleep(2000);
-        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
-        Thread.sleep(2000);
-        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
-        Thread.sleep(2000);
-        fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
+        //PlotGraph plotLightGreen = new PlotGraph("green", 0, 250, 950, 250);
+        String measure = fetchSensorReading_HTTPS("https://172.20.70.229/reading", "root", "root");
+        System.out.println(measure);
                 
+        System.out.println("EOF");
     }
 
     
-    public static void fetchSensorReading_HTTPS(String url, String username, String password) {
+    public static String fetchSensorReading_HTTPS(String url, String username, String password) {
         
+        String res = "";
         // Sensor server uses HTTPS and use a self-signed certificate, then we must
         // create a trust manager that does not validate certificate chains
         TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
@@ -76,7 +56,7 @@ public class App {
         // Install the all-trusting host verifier
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
      
-        // now we are prepared to make HTTPS requests to a server with 
+        // now we are prepared to make HTTPS requests to a server with s
         // self signed certificates
         try {
             URL siteURL = new URL(url);
@@ -91,12 +71,15 @@ public class App {
             BufferedReader in = new BufferedReader(new InputStreamReader(connectionURL.getInputStream()));
             
             String inputLine;
-            while ((inputLine = in.readLine()) != null)
-                System.out.println(inputLine);
-            in.close();
+            while ((inputLine = in.readLine()) != null){
+                //System.out.println(inputLine);
+                res = res + inputLine + "\n"; 
+            }
+            in.close();    
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return res;
     }
 
     private static String base64Encode (String string)    {
