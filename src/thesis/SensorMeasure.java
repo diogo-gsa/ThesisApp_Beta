@@ -18,25 +18,6 @@ public class SensorMeasure {
     private Phase phase2;
     private Phase phase3;
 
-    public static void main(String[] args) {
-
-        System.out.println("Hello!");
-        //String test = "lakasbdkasbd";
-        String test = "{    \"id\":   \"C8:A0:30:AC:3F:AA\", \"name\": \"Núcleo 14\"," + "\n"
-                + "\"timestamp\":    1394970785," + "\n" + " \"phases\":   {" + "\n"
-                + "\"1\":    {" + "\n" + "\"voltage\":  229, " + "\n" + "\"current\":  0.4, "
-                + "\n" + "\"powerfactor\":  0.05 " + "\n" + "} ," + "\n" + "\"2\":    {" + "\n"
-                + "\"voltage\":  231," + "\n" + "\"current\":  0.5," + "\n"
-                + "\"powerfactor\":  0.68" + "\n" + "} ," + "\n" + "\"3\":    {" + "\n"
-                + "\"voltage\":  235," + "\n" + "\"current\":  0.6," + "\n"
-                + "\"powerfactor\":  0.47" + "\n" + "}" + "\n" + "}" + "\n" + "}";
-
-        SensorMeasure sm = new SensorMeasure(test);
-        System.out.println(""+sm.toString());
-
-    }
-
-
     public SensorMeasure(String measureJSON) {
         JSONParser parser = new JSONParser();
         try {
@@ -104,16 +85,35 @@ public class SensorMeasure {
 
     @Override
     public String toString() {
-        return "[Measure Dump] \n| id: " + id + "\n| name:" + name + "\n| ts:" + ts + "\n| phase1:"
-                + phase1.toString() + "\n| phase2:" + phase2.toString() + "\n| phase3:"
+        return "[Measure Dump] \n| id: " + id + "\n| name: " + name + "\n| ts: " + ts + "\n| phase_1:"
+                + phase1.toString() + "\n| phase_2:" + phase2.toString() + "\n| phase_3:"
                 + phase3.toString();
     }
 
     private Phase parsePhaseJSONobject(JSONObject obj, String phaseNumber) {
         JSONObject phases = (JSONObject) obj.get((String) "phases");
         JSONObject specificPhase = (JSONObject) phases.get(phaseNumber);
+        
+        Double current;    
+        Double voltage;
+        
+        try{
+            current = (double) specificPhase.get("current");
+        }catch(ClassCastException e){
+            current = 0.0;
+        }
+        
+        if(specificPhase.get("voltage").getClass().equals(Long.class)){
+            voltage = (double) new Double((long) specificPhase.get("voltage"));
+        }
+        
+        if(specificPhase.get("voltage").getClass().equals(Double.class)){
+            voltage = (double) specificPhase.get("voltage");
+        }
+        
         Phase result = new Phase((long) specificPhase.get("voltage"),
-                (double) specificPhase.get("current"), (double) specificPhase.get("powerfactor"));
+                current, 
+                (double) specificPhase.get("powerfactor"));
         return result;
     }
 
