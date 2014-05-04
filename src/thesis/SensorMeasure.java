@@ -42,7 +42,7 @@ public class SensorMeasure {
     public String getName() {
         return name;
     }
-
+    
     public long geTimestamp() {
         return ts;
     }
